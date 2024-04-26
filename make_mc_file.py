@@ -108,10 +108,10 @@ if __name__ == '__main__':
         Make MC file
 
         Input file should contain
-        OMIT_NAME: list of atom numbers that will be ommited
-        HEAD_NAME: atom number that will be head, e.g. amide N or carbonyl C
-        TAIL_NAME: atom number that will be tail
-        MAIN_CHAIN: atom number connecting head and tail, usually alpha carbon
+        OMIT_NAME list of atom numbers that will be ommited
+        HEAD_NAME atom number that will be head, e.g. amide N or carbonyl C
+        TAIL_NAME atom number that will be tail
+        MAIN_CHAIN atom number connecting head and tail, usually alpha carbon
         '''), formatter_class=argparse.RawTextHelpFormatter)
 
     # required arguments
