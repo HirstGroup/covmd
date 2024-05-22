@@ -8,7 +8,7 @@ ls $lig.mc
 
 # generate ac file from mol2 file containing original coordinates and resp charges with capped modified residue
 # -an n option prevents atom names being changed
-antechamber -fi mol2 -i ${lig}_resp_crd.mol2 -fo ac -o ${lig}.ac -at gaff2 -an n -j 2
+antechamber -fi mol2 -i ${lig}_resp_crd.mol2 -fo ac -o ${lig}.ac -at gaff2 -an n -j 2 -dr no
 
 # generate prepin file (with cartesian coordinates)
 prepgen -i $lig.ac -o $lig.prepc -f car -m $lig.mc -rn $RESNAME -j 2
