@@ -51,4 +51,14 @@ def test_get_pre_head_post_tail():
 	assert parts == {'OMIT_NAME': [66, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78], 'HEAD_NAME': 1, 'TAIL_NAME': 3, 'MAIN_CHAIN': 2, 'PRE_HEAD_TYPE': 'C', 'POST_TAIL_TYPE': 'N'}
 
 
-test_make_mc_file()
+def test_parse_input_mol2():
+
+	d = parse_input_mol2('input/ADS158081_cap_ok_gas.mol2')
+
+	print(d)
+
+	assert d == {'OMIT_NAME': [53, 54, 55, 56, 57, 62, 63, 64, 65, 67, 68, 69], 'HEAD_NAME': 58, 'TAIL_NAME': 60, 'MAIN_CHAIN': 59}
+
+
+
+test_get_parts_auto()

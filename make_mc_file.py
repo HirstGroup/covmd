@@ -102,21 +102,70 @@ def get_pre_head_post_tail(parts, atom_number_name):
     return parts
 
 
+def parse_input_mol2(input):
+    """
+    Get parts automatically from mol2 file by analysing residue names
+    """
+
+    with open(input) as f:
+        lines = []
+        sel = False
+        for line in f:
+            if '@<TRIPOS>BOND' in line: break
+            if sel:
+                lines.append(line)
+            if '@<TRIPOS>ATOM' in line: sel = True
+            
+
+    omit_resnames = ['ASP', 'HIS']
+
+    omit = []
+
+    for line in lines:
+
+        number = int(line.split()[0])
+        name = line.split()[1]
+        resname = line.split()[7]
+
+        if resname in omit_resnames:
+            omit.append(number)
+
+        if resname == 'CYS' and name == 'N':
+            head = number
+
+        if resname == 'CYS' and name == 'C':
+            tail = number
+
+        if resname == 'CYS' and name == 'CA':
+            main_chain = number
+
+    d = {'OMIT_NAME': omit, 'HEAD_NAME': head, 'TAIL_NAME': tail, 'MAIN_CHAIN': main_chain}
+
+    return d
+
+
+
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description=textwrap.dedent('''
-        Make MC file
+        Make MC file, can either use a TXT or MOL2 input 
 
-        Input file should contain
+        TXT Input file should contain
         OMIT_NAME list of atom numbers that will be ommited
         HEAD_NAME atom number that will be head, e.g. amide N or carbonyl C
         TAIL_NAME atom number that will be tail
         MAIN_CHAIN atom number connecting head and tail, usually alpha carbon
+
+        MOL2 Input file should contain
+        resnames for each residue (CYS, ASP, HIS)
+        names for C, O and CA atoms in CYS that will be used for head, tail and main_chain
         '''), formatter_class=argparse.RawTextHelpFormatter)
 
     # required arguments
-    parser.add_argument('-a','--aux', help='Auxiliary mol2 structure file', required=True)
-    parser.add_argument('-i','--input', help='Input file containing atom ids', required=True)
+    parser.add_argument('-a','--aux', help='Auxiliary mol2 structure file with charges and Amber atom types', required=True)
+    parser.add_argument('-i','--input', help='Input file', required=True)
+    parser.add_argument('-fi','--format_input', help='Format of input file, txt or mol2', required=True)
     parser.add_argument('-o','--output', help='Output MC file', required=True)
     
     # optional arguments
@@ -124,7 +173,12 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    parts = parse_input(args.input)
+    if args.format_input.lower() == 'txt':
+        parts = parse_input(args.input)
+    elif args.format_input.lower() == 'mol2':
+        parts = parse_input_mol2(args.input)
+    else:
+        sys.exit('Input format should either be txt or mol2')
 
     atom_number_name = parse_mol2(args.aux)
 
