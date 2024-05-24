@@ -1,11 +1,12 @@
 import argparse
+import ast
 import os
 import sys
 import textwrap
 
 from run import run
 
-def get_atoms_to_strip(input):
+def get_atoms_to_strip(input, head_keep, head_rename, tail_keep, tail_rename):
 	"""
 	Get atoms to strip to make capped ligand
 
@@ -13,6 +14,15 @@ def get_atoms_to_strip(input):
 	----------
 	input : str
 		Input MOL2 file
+	head_keep : list of int
+		List of int starting from zero of atoms from head to keep,
+		numbered relative to residue
+	head_rename : list of int
+		Atoms from head to rename to H
+	tail_keep : list of int
+		Atoms from tail to keep
+	tail_rename : list of int
+		Atoms from tail to rename to H
 
 	Returns
 	-------
@@ -23,14 +33,10 @@ def get_atoms_to_strip(input):
 	"""
 
 	# hardcoded input
-	ligname = 'UNL'
+	ligname_list = ['UNL', 'UNK']
 	headname = 'ASP'
 	covname = 'CYS'
 	tailname = 'HIS'
-	head_keep = [0, 1, 2, 3, 4, 17] # atoms from head to keep
-	tail_keep = [0, 1, 2, 9, 10, 21] # atoms from tail to keep
-	head_rename = [0, 4]
-	tail_rename = [2, 10]
 
 	with open(input) as f:
 		lines = f.readlines()
@@ -53,7 +59,7 @@ def get_atoms_to_strip(input):
 			resname = line.split()[7][0:3]
 			atom_number = int(line.split()[0])
 
-			if resname == ligname:
+			if resname in ligname_list:
 				lig.append(atom_number)
 			if resname == covname:
 				cov.append(atom_number)
@@ -65,11 +71,15 @@ def get_atoms_to_strip(input):
 		if line.startswith('@<TRIPOS>ATOM'):
 			sel = True
 
-	# update head and tail atom numbers based on first atom number in list	
-	head_keep = [i+head[0] for i in head_keep]
-	tail_keep = [i+tail[0] for i in tail_keep]
-	head_rename = [i+head[0] for i in head_rename]
-	tail_rename = [i+tail[0] for i in tail_rename]
+	print(head, tail)
+
+	# update numbers for head and tail from relative numbers within residue
+	# given as input to actual numbers in molecule
+
+	head_keep = [head[i] for i in head_keep]
+	head_rename = [head[i] for i in head_rename]
+	tail_keep = [tail[i] for i in tail_keep]
+	tail_rename = [tail[i] for i in tail_rename]
 
 	strip = []
 
@@ -82,6 +92,8 @@ def get_atoms_to_strip(input):
 		if i not in tail_keep:
 			strip.append(i)
 
+	print(strip)
+
 	strip_pattern = ''
 
 	for i in strip:
@@ -90,7 +102,7 @@ def get_atoms_to_strip(input):
 	return strip_pattern, head_rename + tail_rename
 
 
-def grep_ligand_and_cap(input, output):
+def grep_ligand_and_cap(input, output, grep_pattern_list):
 	"""
 	Grep ligand (UNL and UNL1) can cap (CYS, ASP and HIS) from PDB Glide output
 
@@ -102,8 +114,6 @@ def grep_ligand_and_cap(input, output):
 		Output file with ligand and cap
 	"""
 
-	grep_pattern_list = ['UNL', 'UNL1', 'ASP A 316', 'CYS A 317', 'HIS A 318']
-
 	with open(input) as infile, open(output, 'w') as outfile:
 		for line in infile:
 			for grep_pattern in grep_pattern_list:
@@ -111,7 +121,7 @@ def grep_ligand_and_cap(input, output):
 					outfile.write(line)
 
 
-def make_cap_ligand(input, output):
+def make_cap_ligand(input, output, head_keep, head_rename, tail_keep, tail_rename):
 	"""
 	Make capped ligand from MOL2 file containing ligand, 
 	head residue (previous residue), cov residue (covalently bonded residue),
@@ -123,9 +133,18 @@ def make_cap_ligand(input, output):
 		Input MOL2 file
 	output : str
 		Output file name
+	head_keep : list of int
+		List of int starting from zero of atoms from head to keep,
+		numbered relative to residue
+	head_rename : list of int
+		Atoms from head to rename to H
+	tail_keep : list of int
+		Atoms from tail to keep
+	tail_rename : list of int
+		Atoms from tail to rename to H	 	
 	"""
 
-	strip_pattern, rename_list = get_atoms_to_strip(input)
+	strip_pattern, rename_list = get_atoms_to_strip(input, head_keep, head_rename, tail_keep, tail_rename)
 
 	pdb_file_name = input[:-5] + '.pdb'
 	renamed_file_name = input[:-5] + '_renamed.pdb'
@@ -183,8 +202,11 @@ if __name__ == '__main__':
     # required arguments
     parser.add_argument('-i','--input', help='Input file: MOL2 output from Glide covalent docking', required=True)
     parser.add_argument('-o','--output', help='Output file with capped ligand', required=True)
+    parser.add_argument('-p','--param', help='Parameters dictionary', required=True)
     
     args = parser.parse_args()
+
+    param = ast.literal_eval(args.param)
 
     name = os.path.splitext(args.input)[0]
 
@@ -192,11 +214,11 @@ if __name__ == '__main__':
 
     run(f'obabel {args.input} -O {name}.pdb')
 
-    grep_ligand_and_cap(f'{name}.pdb', f'{name}_precap.pdb')
+    grep_ligand_and_cap(f'{name}.pdb', f'{name}_precap.pdb', grep_pattern_list = param['grep_pattern_list'])
 
     run(f'obabel {name}_precap.pdb -O {name}_precap.mol2')
 
-    make_cap_ligand(f'{name}_precap.mol2', args.output)
+    make_cap_ligand(f'{name}_precap.mol2', args.output, param['head_keep'], param['head_rename'], param['tail_keep'], param['tail_rename'])
 
 
 
