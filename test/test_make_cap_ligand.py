@@ -39,3 +39,12 @@ def test_rename_atoms():
 	assert filecmp.cmp('input/ads081_cap_renamed.pdb', 'output/ads081_cap_renamed.pdb') is True
 
 
+def test_grep_ligand_and_cap():
+	
+	grep_ligand_and_cap('input/ADS158081.pdb', 'output/ADS158081_precap.pdb')
+
+	assert filecmp.cmp('input/ADS158081_precap.pdb', 'output/ADS158081_precap.pdb') is True
+
+test_grep_ligand_and_cap()
+
+

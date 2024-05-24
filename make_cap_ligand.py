@@ -3,6 +3,7 @@ import os
 import sys
 import textwrap
 
+from run import run
 
 def get_atoms_to_strip(input):
 	"""
@@ -89,6 +90,58 @@ def get_atoms_to_strip(input):
 	return strip_pattern, head_rename + tail_rename
 
 
+def grep_ligand_and_cap(input, output):
+	"""
+	Grep ligand (UNL and UNL1) can cap (CYS, ASP and HIS) from PDB Glide output
+
+	Parameters
+	----------
+	input : str
+		Glide PDB output
+	output :  str
+		Output file with ligand and cap
+	"""
+
+	grep_pattern_list = ['UNL', 'UNL1', 'ASP A 316', 'CYS A 317', 'HIS A 318']
+
+	with open(input) as infile, open(output, 'w') as outfile:
+		for line in infile:
+			for grep_pattern in grep_pattern_list:
+				if grep_pattern in line:
+					outfile.write(line)
+
+
+def make_cap_ligand(input, output):
+	"""
+	Make capped ligand from MOL2 file containing ligand, 
+	head residue (previous residue), cov residue (covalently bonded residue),
+	and tail residue (next residue)
+
+	Parameters
+	----------
+	input : str
+		Input MOL2 file
+	output : str
+		Output file name
+	"""
+
+	strip_pattern, rename_list = get_atoms_to_strip(input)
+
+	pdb_file_name = input[:-5] + '.pdb'
+	renamed_file_name = input[:-5] + '_renamed.pdb'
+
+	os.system(f'obabel {input} -O {pdb_file_name}')
+
+	rename_atoms(pdb_file_name, rename_list, renamed_file_name)
+
+	with open('strip.ptraj', 'w') as f:
+		f.write(f'trajin {renamed_file_name}\n')
+		f.write(f'strip @{strip_pattern}\n')
+		f.write(f'trajout {output}\n')
+
+	os.system(f'cpptraj {renamed_file_name} strip.ptraj')
+
+
 def rename_atoms(input, rename_list, output):
 	"""
 	Rename atoms in PDB to H
@@ -121,35 +174,30 @@ def rename_atoms(input, rename_list, output):
 			f.write(line)
 
 
-def make_cap_ligand(input, output):
-	"""
-	Make capped ligand from MOL2 file containing ligand, 
-	head residue (previous residue), cov residue (covalently bonded residue),
-	and tail residue (next residue)
+if __name__ == '__main__':
 
-	Parameters
-	----------
-	input : str
-		Input MOL2 file
-	output : str
-		Output file name
-	"""
+    parser = argparse.ArgumentParser(description=textwrap.dedent('''
+        Make capped ligand from Glide covalent docking MOL2 output 
+        '''), formatter_class=argparse.RawTextHelpFormatter)
 
-	strip_pattern, rename_list = get_atoms_to_strip(input)
+    # required arguments
+    parser.add_argument('-i','--input', help='Input file: MOL2 output from Glide covalent docking', required=True)
+    parser.add_argument('-o','--output', help='Output file with capped ligand', required=True)
+    
+    args = parser.parse_args()
 
-	pdb_file_name = input[:-5] + '.pdb'
-	renamed_file_name = input[:-5] + '_renamed.pdb'
+    name = os.path.splitext(args.input)[0]
 
-	os.system(f'obabel {input} -O {pdb_file_name}')
+    print(name)
 
-	rename_atoms(pdb_file_name, rename_list, renamed_file_name)
+    run(f'obabel {args.input} -O {name}.pdb')
 
-	with open('strip.ptraj', 'w') as f:
-		f.write(f'trajin {renamed_file_name}\n')
-		f.write(f'strip @{strip_pattern}\n')
-		f.write(f'trajout {output}\n')
+    grep_ligand_and_cap(f'{name}.pdb', f'{name}_precap.pdb')
 
-	os.system(f'cpptraj {renamed_file_name} strip.ptraj')
+    run(f'obabel {name}_precap.pdb -O {name}_precap.mol2')
+
+    make_cap_ligand(f'{name}_precap.mol2', args.output)
+
 
 
 
