@@ -206,6 +206,9 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
 
+    if args.input == args.output:
+    	sys.exit('Abort: same input and output file names')
+
     param = ast.literal_eval(args.param)
 
     name = os.path.splitext(args.input)[0]
