@@ -100,3 +100,32 @@ def test_make_cap_ligand():
 
 	os.chdir('../')
 
+def test_reorder_atoms_pdb():
+
+	os.chdir('output')
+
+	os.system('cp ../input/ADS158081_cap.pdb .')
+
+	new_order = reorder_atoms_pdb('ADS158081_cap.pdb', 'ADS158081_cap_reorder.pdb')
+
+	print(new_order)
+
+	assert new_order == [52, 53, 54, 55, 56, 64, 57, 58, 59, 60, 65, 69, 70, 71, 72, 73, 61, 62, 63, 66, 67, 68, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 74, 75, 76, 77]
+
+	assert filecmp.cmp('ADS158081_cap_reorder.pdb', '../input/ADS158081_cap_reorder.pdb') is True
+
+	os.chdir('../')
+
+def test_reorder_atoms_mol2():
+
+	os.chdir('output')
+
+	os.system('cp ../input/ADS158081_cap.mol2 .')
+
+	new_order = reorder_atoms_mol2('ADS158081_cap.mol2', 'ADS158081_cap_reorder.mol2')
+
+	assert new_order == [52, 53, 54, 55, 56, 64, 57, 58, 59, 60, 65, 69, 70, 71, 72, 73, 61, 62, 63, 66, 67, 68, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 74, 75, 76, 77]
+
+	assert filecmp.cmp('ADS158081_cap_reorder.mol2', '../input/ADS158081_cap_reorder.mol2')
+
+	os.chdir('../')

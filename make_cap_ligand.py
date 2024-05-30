@@ -6,6 +6,14 @@ import textwrap
 
 from run import run
 
+
+# hardcoded input
+ligname_list = ['UNL', 'UNK']
+headname = 'ASP'
+covname = 'CYS'
+tailname = 'HIS'
+
+
 def get_atoms_to_strip(input, head_keep, head_rename, tail_keep, tail_rename):
 	"""
 	Get atoms to strip to make capped ligand
@@ -31,12 +39,6 @@ def get_atoms_to_strip(input, head_keep, head_rename, tail_keep, tail_rename):
 	rename_list : list of int
 		List of atom numbers to rename to H
 	"""
-
-	# hardcoded input
-	ligname_list = ['UNL', 'UNK']
-	headname = 'ASP'
-	covname = 'CYS'
-	tailname = 'HIS'
 
 	with open(input) as f:
 		lines = f.readlines()
@@ -191,6 +193,151 @@ def rename_atoms(input, rename_list, output):
 					line = line[:12] + ' H   ' + line[17:77] + 'H  \n'
 
 			f.write(line)
+
+
+def reorder_atoms_mol2(input, output):
+	"""
+	Reorder atoms in MOL2 file
+
+	Parameters
+	----------
+	input : str
+		Input MOL2 file name
+	output :  str
+		Output MOL2 file name
+
+	Returns
+	-------
+	new_order : list of int
+		List of int starting from zero with new_order for atoms
+	"""
+
+	print('WARNING: bonds and atom numbers not valid in output mol2, only use for charges')
+
+	lig_lines = {}
+	head_lines = {}
+	cov_lines = {}
+	tail_lines = {}
+
+	with open(input) as infile:
+		n = 0
+		sel = False
+		for line in infile:
+
+			if '@<TRIPOS>BOND' in line:
+				break
+
+			if sel:
+				resname = line.split()[7][0:3]
+
+				if resname in ligname_list:
+					lig_lines[n] = line
+				elif resname == headname:
+					head_lines[n] = line
+				elif resname == covname:
+					cov_lines[n] = line
+				elif resname == tailname:
+					tail_lines[n] = line
+				else:
+					raise Exception('WARNING: resname not in ligname, headname, covname or tailname')
+				n += 1
+
+			if '@<TRIPOS>ATOM' in line:
+				sel = True
+
+	# write first part of mol2 file
+	with open(input) as infile, open(output, 'w') as f:
+		for line in infile:
+			f.write(line)
+			if '@<TRIPOS>ATOM' in line:
+				break
+
+	# write second part (atom part) of mol2 file
+	with open(output, 'a') as f:
+
+		new_order = []
+		for n, line in head_lines.items():
+			f.write(line)
+			new_order.append(n)
+		for n, line in cov_lines.items():
+			f.write(line)
+			new_order.append(n)
+		for n, line in tail_lines.items():
+			f.write(line)
+			new_order.append(n)
+		for n, line in lig_lines.items():
+			f.write(line)
+			new_order.append(n)	
+
+	# write third part of mol2 file
+	with open(input) as infile, open(output, 'a') as f:
+		sel = False
+		for line in infile:
+			if '@<TRIPOS>BOND' in line:
+				sel = True
+			if sel:
+				f.write(line)
+
+	return new_order
+
+
+def reorder_atoms_pdb(input, output):
+	"""
+	Reorder atoms in PDB file
+
+	Parameters
+	----------
+	input : str
+		Input PDB file name
+	output :  str
+		Output PDB file name
+
+	Returns
+	-------
+	new_order : list of int
+		List of int starting from zero with new_order for atoms
+	"""
+
+	lig_lines = {}
+	head_lines = {}
+	cov_lines = {}
+	tail_lines = {}
+
+	with open(input) as infile:
+		n = 0
+		for line in infile:
+			if 'ATOM' in line:
+				resname = line[17:20]
+
+				if resname in ligname_list:
+					lig_lines[n] = line
+				elif resname == headname:
+					head_lines[n] = line
+				elif resname == covname:
+					cov_lines[n] = line
+				elif resname == tailname:
+					tail_lines[n] = line
+				else:
+					raise Exception('WARNING: resname not in ligname, headname, covname or tailname')
+				n += 1
+
+	new_order = []
+
+	with open(output, 'w') as f:
+		for n, line in head_lines.items():
+			f.write(line)
+			new_order.append(n)
+		for n, line in cov_lines.items():
+			f.write(line)
+			new_order.append(n)
+		for n, line in tail_lines.items():
+			f.write(line)
+			new_order.append(n)
+		for n, line in lig_lines.items():
+			f.write(line)
+			new_order.append(n)
+
+	return new_order
 
 
 if __name__ == '__main__':
