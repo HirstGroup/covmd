@@ -125,7 +125,7 @@ def parse_input_mol2(input):
 
         number = int(line.split()[0])
         name = line.split()[1]
-        resname = line.split()[7]
+        resname = line.split()[7][0:3]
 
         if resname in omit_resnames:
             omit.append(number)

@@ -281,6 +281,63 @@ def reorder_atoms_mol2(input, output):
 	return new_order
 
 
+def reorder_atoms_mol2_from_new_order(input, new_order, output):
+	"""
+	Reorder atoms in MOL2 file
+
+	Parameters
+	----------
+	input : str
+		Input MOL2 file name
+	new_order : list of int
+		List of int starting from zero with new_order for atoms
+	output :  str
+		Output MOL2 file name
+	"""
+
+	print('WARNING: bonds and atom numbers not valid in output mol2, only use for charges')
+
+	atom_lines = []
+
+	with open(input) as infile:
+		n = 0
+		sel = False
+		for line in infile:
+
+			if '@<TRIPOS>BOND' in line:
+				break
+
+			if sel:
+				atom_lines.append(line)
+
+			if '@<TRIPOS>ATOM' in line:
+				sel = True
+
+	# write first part of mol2 file
+	with open(input) as infile, open(output, 'w') as f:
+		for line in infile:
+			f.write(line)
+			if '@<TRIPOS>ATOM' in line:
+				break
+
+	# write second part (atom part) of mol2 file
+	with open(output, 'a') as f:
+
+		for i in new_order:
+			f.write(atom_lines[i])
+
+	# write third part of mol2 file
+	with open(input) as infile, open(output, 'a') as f:
+		sel = False
+		for line in infile:
+			if '@<TRIPOS>BOND' in line:
+				sel = True
+			if sel:
+				f.write(line)
+
+	return new_order
+
+
 def reorder_atoms_pdb(input, output):
 	"""
 	Reorder atoms in PDB file
