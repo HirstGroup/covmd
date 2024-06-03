@@ -5,10 +5,12 @@ pdb=$2
 
 # REQUIRED FILES: $lig.frcmod, $lig.prepc, protein pdb with inserted modified residue, 
 # no hydrogens on protein, and no CONNECT 
-# cov.frcmod with Amber-GAFF parameters
-ls ../cov.frcmod
 ls $lig.frcmod $lig.prepc
 ls $pdb
+
+# copy cov.frcmod with Amber-GAFF parameters from script directory
+dirname=$(dirname "$0")
+cp $dirname/cov.frcmod .
 
 cat > tleap.in <<EOF
 source leaprc.protein.ff19SB
