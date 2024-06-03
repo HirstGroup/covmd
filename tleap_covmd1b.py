@@ -1,10 +1,8 @@
 import argparse
 import textwrap
 
-# hardcoded input
-ligname = 'LIG'
 
-def insert_lig(aux, input, output):
+def insert_lig(aux, input, output, ligname='LIG'):
 	"""
 	Insert ligand prepc file into protein pdb file (with deleted hydrogens)
 
@@ -45,7 +43,10 @@ if __name__ == '__main__':
     parser.add_argument('-i','--input', help='Input PDB file of protein with deleted hydrogens and model ligand', required=True)
     parser.add_argument('-o','--output', help='Output PDB file', required=True)
 
+    # optional arguments
+    parser.add_argument('-l','--ligname', help='Name of ligand', default='LIG', required=False)
+
     args = parser.parse_args()
 
-    insert_lig(args.aux, args.input, args.output)
+    insert_lig(args.aux, args.input, args.output, args.ligname)
 
