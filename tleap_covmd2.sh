@@ -17,7 +17,7 @@ source leaprc.protein.ff19SB
 source leaprc.phosaa19SB
 source leaprc.gaff
 loadamberparams $lig.frcmod
-loadamberparams ../cov.frcmod
+loadamberparams cov.frcmod
 loadamberprep $lig.prepc
 loadamberparams frcmod.ionsjc_tip3p
 source leaprc.water.tip3p

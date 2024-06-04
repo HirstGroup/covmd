@@ -26,10 +26,16 @@ def insert_lig(aux, input, output, ligname='LIG'):
 		for line in infile:
 			if ligname in line and inserted is False:
 				for ligline in liglines:
-					outfile.write(ligline)
+					outfile.write(ligline[:21])
+					outfile.write(f'{chain}{resid+1:>4}')
+					outfile.write(ligline[26:])
 				inserted = True
 			if ligname not in line:
 				outfile.write(line)
+
+			if line.startswith('ATOM'):
+				chain = line[21]
+				resid = int(line[22:26])
 
 
 if __name__ == '__main__':
