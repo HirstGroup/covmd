@@ -23,6 +23,7 @@ loadamberparams frcmod.ionsjc_tip3p
 source leaprc.water.tip3p
 complex = loadPDB $pdb
 set default PBRadii mbondi2
+addions2 complex CL 1
 solvatebox complex TIP3PBOX 10.0
 savepdb complex $lig-box.pdb
 saveAmberParm complex $lig.parm7 $lig.rst7
@@ -30,3 +31,7 @@ quit
 EOF
 
 tleap -f tleap.in
+
+echo
+
+echo "WARNING: charges not added, addions2 complex NA/CL"
