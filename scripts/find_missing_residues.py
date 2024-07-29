@@ -83,7 +83,28 @@ def find_missing_residues(chain, input):
 	return missing_residues
 
 
-def add_missing_residues(aux, chain_aux, chain_input, input, missing_residues_input, output):
+def add_missing_residues(aux, chain_aux, chain_input, input, missing_residues_input):
+	"""
+	Print residues to add for each auxiliary PDB and return residues still missing
+
+	Parameters
+	----------
+	aux : str
+		Name of auxiliary PDB to check if missing residues from input present
+	chain_aux : str
+		Chain name for auxiliary PDB
+	chain_input : str
+		Chain name for input PDB
+	input : str
+		Name of input PDB to check for missing residues
+	missing_residues_input : list of int
+		List of missing residues in input PDB
+
+	Return
+	------
+	missing_residues_input_new : list of int
+		List of residues still missing
+	"""
 
 	resname_list_aux, resid_list_aux = get_residue_list(chain=chain_aux, input=aux)
 
@@ -96,13 +117,30 @@ def add_missing_residues(aux, chain_aux, chain_input, input, missing_residues_in
 	return missing_residues_input_new
 
 
-def add_missing_residues_loop(chain, input, aux_list, output):
+def add_missing_residues_loop(chain, input, aux_list):
+	"""
+	Run loop over all auxiliary PDB files to check if there are residues still missing
+
+	Parameters
+	----------
+	chain : str
+		Chain name for input PDB
+	input : str
+		Name of input PDB to check for missing residues
+	aux_list : list of str
+		List of names of auxiliary PDB to check if missing residues from input present
+
+	Returns
+	-------
+	missing_residues_input_new : list of int
+		List of residues still missing	
+	"""
 
 	missing_residues_input = find_missing_residues(chain=chain, input=input)
 
 	for aux in aux_list:
 
-		missing_residues_input = add_missing_residues(aux=aux, chain_aux=chain, chain_input=chain, input=input, missing_residues_input=missing_residues_input, output=output)
+		missing_residues_input = add_missing_residues(aux=aux, chain_aux=chain, chain_input=chain, input=input, missing_residues_input=missing_residues_input)
 
 	missing_residues_input_range = list_to_range(missing_residues_input)
 
@@ -111,7 +149,15 @@ def add_missing_residues_loop(chain, input, aux_list, output):
 
 def list_to_range(L):
 	"""
-	Shorten a list to show ranges
+	Shorten a list to show ranges in Amber style
+
+	Parameters
+	----------
+	L : list of int
+
+	Returns
+	-------
+	range in Amber style
 	"""
 
 	from itertools import count, groupby

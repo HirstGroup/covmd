@@ -12,8 +12,6 @@ def test_get_residue_list():
 
 	print(resname_list)
 
-test_get_residue_list()
-
 
 def test_find_missing_residues():
 
@@ -61,7 +59,7 @@ def test_add_missing_residues():
 
 	missing_residues_input = find_missing_residues(chain='A', input='ADS158156_1.95_A_AB_al_ok_d_ok_atom.pdb')
 
-	missing_residues_input_new = add_missing_residues(aux='ADS158081_2.48_A_AB_al.pdb', chain_aux='A', chain_input='A', input='ADS158156_1.95_A_AB_al_ok_d_ok_atom.pdb', missing_residues_input=missing_residues_input, output=None)
+	missing_residues_input_new = add_missing_residues(aux='ADS158081_2.48_A_AB_al.pdb', chain_aux='A', chain_input='A', input='ADS158156_1.95_A_AB_al_ok_d_ok_atom.pdb', missing_residues_input=missing_residues_input)
 
 	print('still missing', missing_residues_input_new)
 
@@ -76,7 +74,7 @@ def test_add_missing_residues_all():
 
 	for file in files:
 
-		missing_residues_input_new = add_missing_residues(aux=f'./input/{file}', chain_aux='A', chain_input='A', input='./input/ADS158156_1.95_A_AB_al_ok_d_ok_atom.pdb', missing_residues_input=missing_residues_input, output=None)
+		missing_residues_input_new = add_missing_residues(aux=f'./input/{file}', chain_aux='A', chain_input='A', input='./input/ADS158156_1.95_A_AB_al_ok_d_ok_atom.pdb', missing_residues_input=missing_residues_input)
 
 
 def test_add_missing_residues_all_156_b():
@@ -87,7 +85,7 @@ def test_add_missing_residues_all_156_b():
 
 	for file in files:
 
-		missing_residues_input_new = add_missing_residues(aux=f'./input/{file}', chain_aux='B', chain_input='B', input='./input/ADS158156_1.95_A_AB_al_ok_d_ok_atom.pdb', missing_residues_input=missing_residues_input, output=None)
+		missing_residues_input_new = add_missing_residues(aux=f'./input/{file}', chain_aux='B', chain_input='B', input='./input/ADS158156_1.95_A_AB_al_ok_d_ok_atom.pdb', missing_residues_input=missing_residues_input)
 
 
 def test_add_missing_residues_all_081_a():
@@ -100,7 +98,7 @@ def test_add_missing_residues_all_081_a():
 
 	for file in files:
 
-		missing_residues_input_new = add_missing_residues(aux=f'./input/{file}', chain_aux='A', chain_input='A', input='./input/ADS158081_2.48_A_AB_al.pdb', missing_residues_input=missing_residues_input, output=None)
+		missing_residues_input_new = add_missing_residues(aux=f'./input/{file}', chain_aux='A', chain_input='A', input='./input/ADS158081_2.48_A_AB_al.pdb', missing_residues_input=missing_residues_input)
 
 
 def test_add_missing_residues_all_081_b():
@@ -113,11 +111,10 @@ def test_add_missing_residues_all_081_b():
 
 	for file in files:
 
-		missing_residues_input_new = add_missing_residues(aux=f'./input/{file}', chain_aux='B', chain_input='B', input='./input/ADS158081_2.48_A_AB_al.pdb', missing_residues_input=missing_residues_input, output=None)
+		missing_residues_input_new = add_missing_residues(aux=f'./input/{file}', chain_aux='B', chain_input='B', input='./input/ADS158081_2.48_A_AB_al.pdb', missing_residues_input=missing_residues_input)
 
-test_add_missing_residues_all_081_b()
 
-def test_add_missing_residues_loop():
+def test_add_missing_residues_loop_a():
 
 	os.chdir('output')
 
@@ -126,7 +123,7 @@ def test_add_missing_residues_loop():
 	for file in files:
 		os.system(f'cp ../input/{file} .')
 
-	missing_residues_input = add_missing_residues_loop(chain='A', input='ADS158081_2.48_A_AB_al.pdb', aux_list=files, output=None)
+	missing_residues_input = add_missing_residues_loop(chain='A', input='ADS158081_2.48_A_AB_al.pdb', aux_list=files)
 
 	assert missing_residues_input == ''
 
@@ -183,5 +180,89 @@ def test_list_to_range():
 	print(output)
 
 
+def test_complete_ads081_a():
+	"""
+	Run loop for ads081 chain a to complete it with missing residues
+	"""
 
+	os.chdir('output')
+
+	files = ['ADS160082_1.88_A_AB_al.pdb', 'NOT0016_1.88_A_AB_al.pdb'] #, 'NOT0002_2.07_A_AB_al.pdb', 'ADS160919_1.92_A_AB_al.pdb', 'ADS160918_2.74_A_AB_al.pdb', ''ADS160243_2.55_A_AB_al.pdb', 'ADS158081_2.48_A_AB_al.pdb', 'NOT0001_2.50_A_AB_al.pdb', 'ADS160790_2.59_A_AB_al.pdb', 'ADS158156_1.95_A_AB_al.pdb']
+
+	for file in files:
+		os.system(f'cp ../input/{file} .')
+
+	missing_residues_input = add_missing_residues_loop(chain='A', input='ADS158081_2.48_A_AB_al.pdb', aux_list=files)
+
+	assert missing_residues_input == ''
+
+	print(missing_residues_input)
+
+	os.chdir('../')	
+
+
+def test_complete_ads081_b():
+	"""
+	Run loop for ads081 chain b to complete it with missing residues
+	"""
+
+	os.chdir('output')
+
+	files = ['ADS160082_1.88_A_AB_al.pdb', 'NOT0016_1.88_A_AB_al.pdb'] #, 'NOT0002_2.07_A_AB_al.pdb', 'ADS160919_1.92_A_AB_al.pdb', 'ADS160918_2.74_A_AB_al.pdb', ''ADS160243_2.55_A_AB_al.pdb', 'ADS158081_2.48_A_AB_al.pdb', 'NOT0001_2.50_A_AB_al.pdb', 'ADS160790_2.59_A_AB_al.pdb', 'ADS158156_1.95_A_AB_al.pdb']
+
+	for file in files:
+		os.system(f'cp ../input/{file} .')
+
+	missing_residues_input = add_missing_residues_loop(chain='B', input='ADS158081_2.48_A_AB_al.pdb', aux_list=files)
+
+	assert missing_residues_input == ''
+
+	print(missing_residues_input)
+
+	os.chdir('../')	
+
+
+def test_complete_ads156_a():
+	"""
+	Run loop for ads156 chain a to complete it with missing residues
+	"""
+
+	os.chdir('output')
+
+	files = ['NOT0016_1.88_A_AB_al.pdb', 'ADS160082_1.88_A_AB_al.pdb'] #, 'NOT0002_2.07_A_AB_al.pdb', 'ADS160919_1.92_A_AB_al.pdb', 'ADS160918_2.74_A_AB_al.pdb', ''ADS160243_2.55_A_AB_al.pdb', 'ADS158081_2.48_A_AB_al.pdb', 'NOT0001_2.50_A_AB_al.pdb', 'ADS160790_2.59_A_AB_al.pdb', 'ADS158156_1.95_A_AB_al.pdb']
+
+	for file in files:
+		os.system(f'cp ../input/{file} .')
+
+	missing_residues_input = add_missing_residues_loop(chain='A', input='ADS158156_1.95_A_AB_al.pdb', aux_list=files)
+
+	assert missing_residues_input == ''
+
+	print(missing_residues_input)
+
+	os.chdir('../')	
+
+
+def test_complete_ads156_b():
+	"""
+	Run loop for ads156 chain b to complete it with missing residues
+	"""
+
+	os.chdir('output')
+
+	files = ['NOT0016_1.88_A_AB_al.pdb', 'ADS160082_1.88_A_AB_al.pdb'] #, 'NOT0002_2.07_A_AB_al.pdb', 'ADS160919_1.92_A_AB_al.pdb', 'ADS160918_2.74_A_AB_al.pdb', ''ADS160243_2.55_A_AB_al.pdb', 'ADS158081_2.48_A_AB_al.pdb', 'NOT0001_2.50_A_AB_al.pdb', 'ADS160790_2.59_A_AB_al.pdb', 'ADS158156_1.95_A_AB_al.pdb']
+
+	for file in files:
+		os.system(f'cp ../input/{file} .')
+
+	missing_residues_input = add_missing_residues_loop(chain='B', input='ADS158156_1.95_A_AB_al.pdb', aux_list=files)
+
+	assert missing_residues_input == ''
+
+	print(missing_residues_input)
+
+	os.chdir('../')	
+
+
+test_complete_ads156_b()
 
