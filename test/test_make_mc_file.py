@@ -58,7 +58,3 @@ def test_parse_input_mol2():
 	print(d)
 
 	assert d == {'OMIT_NAME': [53, 54, 55, 56, 57, 62, 63, 64, 65, 67, 68, 69], 'HEAD_NAME': 58, 'TAIL_NAME': 60, 'MAIN_CHAIN': 59}
-
-
-
-test_get_parts_auto()
