@@ -1,0 +1,14 @@
+source leaprc.protein.ff19SB
+source leaprc.phosaa19SB
+source leaprc.gaff
+loadamberparams ADS158081_cap.frcmod
+loadamberparams cov.frcmod
+loadamberprep ADS158081_cap.prepc
+loadamberparams frcmod.ionsjc_tip3p
+source leaprc.water.tip3p
+complex = loadPDB ADS158081_cap_protein.pdb
+set default PBRadii mbondi2
+solvatebox complex TIP3PBOX 10.0
+savepdb complex ADS158081_cap-box.pdb
+saveAmberParm complex ADS158081_cap.parm7 ADS158081_cap.rst7
+quit
