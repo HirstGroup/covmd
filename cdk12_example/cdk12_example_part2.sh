@@ -7,10 +7,13 @@ cp input/ADS158156_complete_min2_strip_ab.pdb output/
 
 cd output
 
+# calculate RESP charges from ESP output 
 antechamber -i ${lig}_cap_esp.log -fi gout -gv 1 -o ${lig}_cap_resp.mol2 -fo mol2 -c resp -rn LIG -dr no
 
+# update coordinates of ligand to original ones
 antechamber -i ${lig}_cap_resp.mol2 -fi mol2 -o ${lig}_cap_resp_crd.mol2 -fo mol2 -a ${lig}_cap.mol2 -fa mol2 -ao crd -dr no
 
+# create MC file
 python ../../make_mc_file.py -i ${lig}_cap.mol2 -fi mol2 -a ${lig}_cap_resp_crd.mol2 -o ${lig}_cap.mc
 
 bash ../../tleap_covmd1.sh ${lig}_cap LIG
